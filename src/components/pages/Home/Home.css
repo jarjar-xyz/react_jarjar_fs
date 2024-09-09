@@ -1,0 +1,218 @@
+:root {
+  --bg-color: #e0e5ec;
+  --text-color: #333;
+  --shadow-light: #ffffff;
+  --shadow-dark: #a3b1c6;
+  --shine-color: rgba(255, 255, 255, 0.4);
+  --success-color: #4caf50;
+  --error-color: #f44336;
+}
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding: 20px;
+  border-radius: 15px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+}
+nav a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: var(--text-color);
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+  transition: all 0.3s ease;
+}
+nav a:hover {
+  box-shadow:
+    inset 5px 5px 10px var(--shadow-dark),
+    inset -5px -5px 10px var(--shadow-light);
+}
+h1,
+h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+.header {
+  display: flex;
+  background: var(--bg-color);
+  color: var(--text-color);
+  text-decoration: none;
+  border-radius: 25px;
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn {
+  display: inline-block;
+  padding: 15px 30px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  text-decoration: none;
+  border-radius: 50px;
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn:hover {
+  box-shadow:
+    inset 5px 5px 10px var(--shadow-dark),
+    inset -5px -5px 10px var(--shadow-light);
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    transparent,
+    transparent,
+    transparent,
+    var(--shine-color),
+    transparent,
+    transparent,
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+.btn:hover::before {
+  animation: none;
+  opacity: 0;
+}
+@keyframes shine {
+  0% {
+    top: -50%;
+    left: -50%;
+  }
+  100% {
+    top: 150%;
+    left: 150%;
+  }
+}
+
+.nft-section-title {
+  text-align: center;
+  margin-bottom: 0px !important;
+  font-size: 1.8em;
+  padding: 15px;
+  border-radius: 15px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+.nft-item {
+  border-radius: 15px;
+  overflow: hidden;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+  transition: all 0.3s ease;
+}
+.nft-item:hover {
+  transform: translateY(-5px);
+}
+.nft-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px 15px 0 0;
+}
+.nft-info {
+  padding: 20px;
+  text-align: center;
+}
+.about-section {
+  margin-top: 60px;
+  padding: 30px;
+  border-radius: 15px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+}
+footer {
+  margin-top: 40px;
+  text-align: center;
+  color: var(--text-color);
+  padding: 20px;
+  border-radius: 15px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+}
+.notification {
+  position: fixed;
+  right: -300px;
+  top: 20px;
+  width: 280px;
+  padding: 15px;
+  border-radius: 10px;
+  background: var(--bg-color);
+  box-shadow:
+    5px 5px 10px var(--shadow-dark),
+    -5px -5px 10px var(--shadow-light);
+  transition: right 0.5s ease;
+  z-index: 1000;
+}
+.notification.show {
+  right: 20px;
+}
+.notification.success {
+  border-left: 4px solid var(--success-color);
+}
+.notification.error {
+  border-left: 4px solid var(--error-color);
+}
+.notification-content {
+  display: flex;
+  align-items: center;
+}
+.notification-icon {
+  font-size: 24px;
+  margin-right: 10px;
+}
+.notification-message {
+  flex-grow: 1;
+}

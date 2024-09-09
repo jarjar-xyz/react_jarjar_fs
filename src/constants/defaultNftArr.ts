@@ -1,0 +1,26 @@
+export const arrNft = [
+  {
+    explorer:
+      "https://suiscan.xyz/testnet/object/0x3ab123d085a9365c6f18a81c5c3090e5f4c8888f9aea1512f9d806cdb5ab15c3",
+    gen_result:
+      "https://jarjar-mainnet.s3.amazonaws.com/5d41443c-c9b3-4e19-afa7-bcf628126af5",
+  },
+  {
+    explorer:
+      "https://suiscan.xyz/testnet/object/0x43b638fa323fd3ab24b284f8c11ccc7936785b3dcb02de6cf75091a22a553496",
+    gen_result:
+      "https://jarjar-mainnet.s3.amazonaws.com/9c1729f3-a2f6-4bf0-b780-811e82935238",
+  },
+  {
+    explorer:
+      "https://suiscan.xyz/testnet/object/0xffe743c79bca8c0892a0daede9dd8b5603c78c7f90c3755fc5f37cf7c2f4943b",
+    gen_result:
+      "https://jarjar-mainnet.s3.amazonaws.com/d4ba2167-1e15-47c7-8808-281391f5b9fb",
+  },
+  {
+    explorer:
+      "https://suiscan.xyz/testnet/object/0x61a5009fc2a23773c2490652ea30417751283e9335b2eae6df56123bdd36850f",
+    gen_result:
+      "https://jarjar-mainnet.s3.amazonaws.com/10da6af9-29e1-4b8d-af92-9a39011303f1",
+  },
+];

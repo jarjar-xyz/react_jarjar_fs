@@ -1,11 +1,7 @@
-# JARJAR #1 AI collection mint website
-
-Source code for the JARJAR #1 AI collection mint website.
-
-Interacting with AI Oracle on testnet
+# JARJAR FS, front end to upload onchain files
 
 run with `npm run dev`
 
-access prod at [https://mint.jarjar.xyz](https://mint.jarjar.xyz)
+access prod at [https://fs.jarjar.xyz](https://fs.jarjar.xyz)
 
 
