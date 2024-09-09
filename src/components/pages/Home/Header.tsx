@@ -23,7 +23,7 @@ export const Header = () => {
   }, [currentAccount, signAndExecuteTx, suiClient]);
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center p-4">
+    <div className="flex flex-col md:flex-row justify-between items-center">
       <div className="flex flex-col items-center md:items-start w-full md:w-auto mb-4 md:mb-0">
         <h1 className="mb-0 text-2xl md:text-3xl">JarJarFS</h1>
         <p className="text-gray-400 text-sm md:text-base">Store any file on the Sui blockchain.</p>

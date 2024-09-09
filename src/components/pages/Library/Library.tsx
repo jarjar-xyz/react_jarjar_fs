@@ -115,6 +115,7 @@ const FileLibrary = () => {
           </li>
         ))}
       </ul>
+         {files?.length == 0 ? (<p className="text-gray-500 text-center py-8">You currently have no files.</p>) : null}
       <ConfirmationModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
