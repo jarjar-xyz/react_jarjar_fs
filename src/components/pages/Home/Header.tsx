@@ -39,17 +39,10 @@ export const Header = () => {
           <div className="btn w-full md:w-auto">Library</div>
         </Link>
         <span>
-        <div className="btn w-full md:w-auto">
-        {/* <button
-          disabled={loading}
-          onClick={() => {
-            setOpen(true);
-          }}
-        > */}
+        <div className="btn w-full md:w-auto" onClick={() => setOpen(true)}>
           {currentAccount
             ? truncateAddress(currentAccount.address)
             : "Connect Wallet"}
-        {/* </button> */}
         </div>
         </span>
       </div>
