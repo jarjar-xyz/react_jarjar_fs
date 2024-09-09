@@ -18,6 +18,8 @@ export const Header = () => {
 
   useEffect(() => {
     currentAccount?.address && console.log("addre", currentAccount?.address);
+    currentAccount?.address && (moveTxService.userAddress = currentAccount?.address);
+
     moveTxService.signAndExecute = signAndExecuteTx;
     moveTxService.suiClient = suiClient;
   }, [currentAccount, signAndExecuteTx, suiClient]);

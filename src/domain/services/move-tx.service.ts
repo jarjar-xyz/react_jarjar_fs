@@ -16,6 +16,7 @@ export class MoveTxService {
   suiClient: SuiClient | null = null;
   signAndExecute: any = null;
   uploadProgress: WritableObservable<number> = observable(0);
+  userAddress: string | undefined = undefined;
   file: WritableObservable<File | null> = observable(null);
   fileObjectId: WritableObservable<string | null> = observable(null);
 
@@ -162,6 +163,12 @@ export class MoveTxService {
 
   async prepareFile(): Promise<void> {
     const file = this.file.get();
+
+    if (!this.userAddress) {
+      toast.error("Connect your wallet first!");
+      return;
+    }
+
     if (!file) {
       toast.error("File not selected");
       throw new Error("File not selected");
