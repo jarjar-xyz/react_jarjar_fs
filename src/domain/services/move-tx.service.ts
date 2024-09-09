@@ -46,16 +46,42 @@ export class MoveTxService {
     return fileObjects;
   }
 
-  async getOwnedFilesInfo(walletAddress: string): Promise<any[]> {
+  async getOwnedFilesInfo(): Promise<any[]> {
     if (!this.suiClient) throw new Error("SuiClient not initialized");
+    if (!this.userAddress) throw new Error("User address not initialized");
 
-    const objects = await this.getOwnedFiles(walletAddress);
+    const objects = await this.getOwnedFiles(this.userAddress);
     const fileInfos = await Promise.all(objects.map(obj => this.getFileInfo(obj)));
     return fileInfos;
   }
 
   async executeTx(tx: Transaction, wait: boolean = false) {
-    const exec = new Promise((resolve, reject) => {
+    const exec = new Promise(async (resolve, reject) => {
+
+      // if (!this.suiClient || !this.userAddress) {
+      //   throw new Error("SuiClient or user address not initialized");
+      // }
+
+      // const coins = await this.suiClient.getCoins({
+      //   owner: this.userAddress,
+      //   coinType: "0x2::sui::SUI",
+      // });
+
+
+    
+      // // Sort coins by balance in descending order
+      // const sortedCoins = coins.data.sort((a, b) => BigInt(b.balance) - BigInt(a.balance) as unknown as number);
+    
+      // // Select the coin with the highest balance
+      // const gasCoin = sortedCoins[0];
+    
+      // if (!gasCoin) {
+      //   throw new Error("No SUI coins found in the wallet");
+      // }
+      // // Set the gas coin for the transaction
+      // tx.setGasPayment([{ objectId: gasCoin.coinObjectId, digest: gasCoin.digest, version: gasCoin.version }]);
+      // tx.setGasBudget(1000000000);
+
       this.signAndExecute(
         {
           transaction: tx,
@@ -63,6 +89,7 @@ export class MoveTxService {
           options: {
             showEffects: true,
             showObjectChanges: true,
+            showInput: true
           },
         },
         {
@@ -132,7 +159,7 @@ export class MoveTxService {
       arguments: [tx.object(fileId)],
     });
 
-    return await this.executeTx(tx);
+    return await this.executeTx(tx, true);
   }
 
   async createFile(): Promise<unknown> {
@@ -153,12 +180,17 @@ export class MoveTxService {
         tx.object(SUI_CLOCK_OBJECT_ID)],
     });
 
-    const result:any = await this.executeTx(tx);
-    const effects = bcs.TransactionEffects.parse(Uint8Array.from(result.rawEffects));
-    const fileObjectId = effects.V2?.changedObjects[1][0] as string;
-    console.log("fileObjectId", fileObjectId);
-    this.fileObjectId.set(fileObjectId);
-    return fileObjectId;
+
+    const result:any = await this.executeTx(tx, true);
+    console.log("result", result);
+
+    const objectId = result.effects.created[0].reference.objectId;
+    console.log("objectId", objectId);
+    // const effects = bcs.TransactionEffects.parse(Uint8Array.from(result.rawEffects));
+    // const fileObjectId = effects.V2?.changedObjects[1][0] as string;
+    // console.log("fileObjectId", fileObjectId);
+    this.fileObjectId.set(objectId);
+    return objectId;
   }
 
   async prepareFile(): Promise<void> {
@@ -221,6 +253,7 @@ export class MoveTxService {
   async getFileInfo(fileId: string): Promise<any> {
     if (!fileId || !fileId.length) throw new Error("FileId not provided");
     if (!this.suiClient) throw new Error("SuiClient not initialized");
+    if (!this.userAddress) throw new Error("User address not initialized");
 
     const tx = new Transaction();
     tx.moveCall({
@@ -230,8 +263,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender:
-        "0xd989d8c55f5b28524efd20d6e4cab479686d28f3fc000fdb5d5fe40b52f1d8c2", // Dummy sender for devInspect,
+      sender: this.userAddress
     });
 
     console.log("getFileInfo result", result);
@@ -271,6 +303,7 @@ export class MoveTxService {
 
   async getChunk(fileId: string, index: number): Promise<number[] | void> {
     if (!this.suiClient) throw new Error("SuiClient not initialized");
+    if (!this.userAddress) throw new Error("User address not initialized");
 
     const tx = new Transaction();
     tx.moveCall({
@@ -280,8 +313,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender:
-        "0xd989d8c55f5b28524efd20d6e4cab479686d28f3fc000fdb5d5fe40b52f1d8c2", // Dummy sender for devInspect,
+      sender: this.userAddress
     });
 
     const FileChunk = bcs.struct("FileChunk", {
@@ -302,6 +334,7 @@ export class MoveTxService {
 
   async getChunkCount(fileId: string): Promise<number> {
     if (!this.suiClient) throw new Error("SuiClient not initialized");
+    if (!this.userAddress) throw new Error("User address not initialized");
 
     const tx = new Transaction();
     tx.moveCall({
@@ -311,8 +344,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender:
-        "0xd989d8c55f5b28524efd20d6e4cab479686d28f3fc000fdb5d5fe40b52f1d8c2", // Dummy sender for devInspect,
+      sender:this.userAddress
     });
     const chunk_count = result.results?.[0]?.returnValues?.[0]?.[0] || [];
     const parsed_chunk_count = bcs.u64().parse(Uint8Array.from(chunk_count));
@@ -324,6 +356,7 @@ export class MoveTxService {
 
   async getChunkOrder(fileId: string): Promise<number[]> {
     if (!this.suiClient) throw new Error("SuiClient not initialized");
+    if (!this.userAddress) throw new Error("User address not initialized");
     const tx = new Transaction();
     tx.moveCall({
       target: `${PACKAGE_ID}::${MODULE_NAME}::get_chunk_order`,
@@ -331,8 +364,8 @@ export class MoveTxService {
     });
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender:
-        "0xd989d8c55f5b28524efd20d6e4cab479686d28f3fc000fdb5d5fe40b52f1d8c2", // Dummy sender for devInspect,
+      sender: this.userAddress
+        
     });
 
     console.log("getChunkOrder result", result);
