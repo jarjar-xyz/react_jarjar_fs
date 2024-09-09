@@ -4,7 +4,7 @@ import { useServices } from "@/domain/core/services";
 import toast from "react-hot-toast";
 
 export const Dropzone = () => {
-  const { fileStorageService, moveTxService } = useServices();
+  const { moveTxService } = useServices();
   const [isDragActive, setIsDragActive] = useState(false);
   const [preview, setPreview] = useState<null | string>(null);
 
@@ -36,7 +36,7 @@ export const Dropzone = () => {
         setPreview(objectUrl);
       }
     },
-    [fileStorageService],
+    [moveTxService],
   );
 
   const handleChange = useCallback(
@@ -55,7 +55,7 @@ export const Dropzone = () => {
         setPreview(objectUrl);
       }
     },
-    [fileStorageService],
+    [moveTxService],
   );
 
   const removeFile = (e: any) => {
