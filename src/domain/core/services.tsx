@@ -1,15 +1,12 @@
 import { createContext, useContext } from "react";
-import { ApiService } from "./api.service";
+// import { ApiService } from "./api.service";
 import { MoveTxService } from "../services/move-tx.service";
-import { FileStorageService } from "../services/fileStorage.service";
 
-const apiService = new ApiService();
-const fileStorageService = new FileStorageService();
+// const apiService = new ApiService();
 const moveTxService = new MoveTxService();
 
 export const services = {
   moveTxService,
-  fileStorageService,
 };
 
 export type Services = typeof services;
