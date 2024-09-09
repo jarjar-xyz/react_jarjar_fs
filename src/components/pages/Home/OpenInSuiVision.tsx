@@ -10,7 +10,7 @@ export const OpenInSuiVision = () => {
     <div>
       {fileObjectId && (
         <a
-          href={`https://testnet.suivision.xyz/object/${fileObjectId}`}
+          href={`https://mainnet.suivision.xyz/object/${fileObjectId}`}
           target="_blank"
         >
           <h3 className="text-2xl p-4 text-center underline text-blue-800">
