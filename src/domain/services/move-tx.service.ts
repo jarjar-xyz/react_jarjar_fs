@@ -10,8 +10,8 @@ import { SUI_CLOCK_OBJECT_ID } from "@mysten/sui/utils";
 console.log("SUI_CLOCK_OBJECT_ID",SUI_CLOCK_OBJECT_ID);
 
 const PACKAGE_ID =
-  "0x05679523b6e292da65f567c114604f5af26a68223b508c400dbb3b2337830799";
-const MODULE_NAME = "file_storage";
+  "0xf9ed7e35ec12ae14becc95d58ce52b220922321e66c05a3339b567a40c3d7c73";
+const MODULE_NAME = "jarjar_fs";
 export class MoveTxService {
   suiClient: SuiClient | null = null;
   signAndExecute: any = null;
