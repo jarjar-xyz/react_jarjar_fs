@@ -105,7 +105,7 @@ export const Dropzone = () => {
               drop
             </p>
             <p className="text-xs text-gray-400">
-              Any file (MAX SIZE. 250Kb)
+              Any file (MAX SIZE. 110Kb)
             </p>
           </div>
         )}
