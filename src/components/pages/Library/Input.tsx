@@ -20,7 +20,7 @@ export const NeuromorphicInput = ({ placeholder = "", type = "text" }) => {
     }, [value]);
   
     useEffect(() => {
-      moveTxService.getOwnedFilesInfo("0xd989d8c55f5b28524efd20d6e4cab479686d28f3fc000fdb5d5fe40b52f1d8c2").then((files) => {
+      moveTxService.getOwnedFilesInfo().then((files) => {
         console.log("files", files);
       });
     }, []);
