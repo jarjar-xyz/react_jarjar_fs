@@ -1,12 +1,15 @@
 import { createContext, useContext } from "react";
 // import { ApiService } from "./api.service";
 import { MoveTxService } from "../services/move-tx.service";
+import { DropzoneService } from "../services/dropzone.service";
 
 // const apiService = new ApiService();
 const moveTxService = new MoveTxService();
+const dropzoneService = new DropzoneService(moveTxService);
 
 export const services = {
   moveTxService,
+  dropzoneService,
 };
 
 export type Services = typeof services;

@@ -8,6 +8,7 @@ export const NeuromorphicButton = ({ children, onClick }: Props) => {
     <button
       onClick={onClick}
       className="
+        mt-8
           px-6 py-3
           bg-gray-200
           rounded-xl
