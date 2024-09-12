@@ -11,13 +11,13 @@ import { FileStorageService } from "./fileStorage.service";
 
 console.log("SUI_CLOCK_OBJECT_ID", SUI_CLOCK_OBJECT_ID);
 
-const PACKAGE_ID =
-  "0xf9ed7e35ec12ae14becc95d58ce52b220922321e66c05a3339b567a40c3d7c73";
-const MODULE_NAME = "jarjar_fs";
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID;
+const MODULE_NAME = import.meta.env.VITE_MODULE_NAME;
+
 export class MoveTxService {
   suiClient: SuiClient | null = null;
   signAndExecute: any = null;
-  uploadProgress: WritableObservable<number> = observable(0);
+  uploadLoading: WritableObservable<boolean> = observable(false);
   userAddress: string | undefined = undefined;
   file: WritableObservable<File | null> = observable(null);
   fileObjectId: WritableObservable<string | null> = observable(null);
@@ -155,7 +155,7 @@ export class MoveTxService {
       throw new Error("File not selected");
     }
 
-    this.uploadProgress.set(10);
+    this.uploadLoading.set(true);
     console.log("createFile", file);
     const tx = new Transaction();
 
@@ -186,12 +186,29 @@ export class MoveTxService {
       toast.error("File not selected");
       throw new Error("File not selected");
     }
-    const result = await this.walrusApi.uploadFile(file, 1);
-    toast.success("File uploaded to Walrus");
-    console.log("result", result);
-    const binaryData = await this.getFileWalrus(result.blobId);
-    const blob = new Blob([binaryData], { type: file.type });
-    this.fileStorageService.addFileToDb({ ...result, blob: blob });
+    this.uploadLoading.set(true);
+    try {
+      const result = await this.walrusApi.uploadFile(file, 1);
+      toast.success("File uploaded to Walrus");
+      console.log("result", result);
+      const blob = await this.getFileWalrus(result.blobId);
+      // const blob = new Blob([binaryData], { type: file.type });
+      this.fileStorageService.addFileToDb({ ...result, blob: blob });
+      toast.success("File added to Walrus, you can check it in the Library");
+    } catch (error) {
+      throw error;
+    }
+    this.uploadLoading.set(false);
+  }
+
+  async test() {
+    const blob = await this.getFileWalrus(
+      "CLjUyEj4qQXn4vdhYh6FQIWYgeiKvF_OBwOdJMAhBQM",
+    );
+    console.log("blob", blob);
+    const arrayBuffer = await blob.arrayBuffer();
+    console.log(blob.type);
+    console.log(arrayBuffer);
   }
 
   async getFileWalrus(id: string): Promise<Blob> {
@@ -238,8 +255,8 @@ export class MoveTxService {
       }
 
       await this.executeTx(tx, true);
-      this.uploadProgress.set(Math.round((i / totalChunks) * 80));
       toast.success("File uploaded, go to Library to see it");
+      this.uploadLoading.set(false);
     }
   }
 

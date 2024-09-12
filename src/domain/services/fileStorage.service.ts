@@ -30,8 +30,6 @@ export class FileStorageService {
       createdAt,
       blob,
     });
-    toast.success("File added to db");
-    console.log("walrusDbId", walrusDbId);
     return walrusDbId;
   }
 }

@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 
 export class DropzoneService {
   isDragActive: WritableObservable<boolean> = observable(false);
-  preview: WritableObservable<string | null> = observable(null);
+  preview: WritableObservable<{ url: string; fileType: string } | null> =
+    observable(null);
   activeTab: WritableObservable<"walrus" | "sui"> = observable<
     "walrus" | "sui"
   >("walrus");
@@ -55,7 +56,7 @@ export class DropzoneService {
     }
     this.moveTxService.file.set(file);
     const objectUrl = URL.createObjectURL(file);
-    this.preview.set(objectUrl);
+    this.preview.set({ url: objectUrl, fileType: file.type });
   }
 
   removeFile(e: React.MouseEvent<HTMLButtonElement>) {
@@ -64,6 +65,6 @@ export class DropzoneService {
     this.moveTxService.file.set(null);
     this.moveTxService.fileObjectId.set(null);
     this.preview.set(null);
-    this.moveTxService.uploadProgress.set(0);
+    this.moveTxService.uploadLoading.set(false);
   }
 }

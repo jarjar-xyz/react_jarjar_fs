@@ -90,7 +90,7 @@ const FileLibrary = () => {
   return (
     <div className="mt-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold mb-2 sm:mb-0">File Library</h2>
+        <h2 className="text-2xl font-bold mb-2 sm:mb-0">Sui File Library</h2>
         <span className="text-sm text-gray-500">
           Files owned by your account
         </span>
@@ -137,7 +137,7 @@ const FileLibrary = () => {
       </ul>
       {files?.length == 0 ? (
         <p className="text-gray-500 text-center py-8">
-          You currently have no files.
+          You currently have no files on SUI.
         </p>
       ) : null}
       <WalrusLibrary />

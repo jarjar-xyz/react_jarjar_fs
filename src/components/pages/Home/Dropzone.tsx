@@ -48,13 +48,39 @@ const Preview = () => {
   const preview = useObservable(dropzoneService.preview);
 
   if (!preview) return null;
+
+  const { url, fileType } = preview;
+
+  const type = fileType.split("/")[0];
+
+  console.log(url, fileType);
+
+  if (!url) return null;
   return (
     <div className="relative w-full h-full">
-      <img
-        src={preview}
-        alt="Preview"
-        className="w-full h-full object-contain rounded-lg "
-      />
+      {type === "image" && (
+        <img
+          src={url}
+          alt="Preview"
+          className="w-full h-full object-contain rounded-lg "
+        />
+      )}
+      {type === "video" && (
+        <video
+          autoPlay
+          muted
+          src={url}
+          className="w-full h-full object-contain rounded-lg "
+          controls
+        />
+      )}
+      {type === "audio" && (
+        <audio
+          src={url}
+          className="w-full h-full object-contain rounded-lg "
+          controls
+        />
+      )}
       <button
         onClick={dropzoneService.removeFile}
         className="absolute top-3 right-3 p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors duration-200 shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]"
@@ -70,7 +96,6 @@ export const Dropzone = () => {
   const preview = useObservable(dropzoneService.preview);
   const isDragActive = useObservable(dropzoneService.isDragActive);
   const activeTab = useObservable(dropzoneService.activeTab);
-
   if (!dropzoneService) return null;
 
   return (
@@ -95,7 +120,7 @@ export const Dropzone = () => {
             type="file"
             className="hidden"
             onChange={dropzoneService.handleChange}
-            accept="image/*"
+            accept="*"
           />
         </label>
       </div>
@@ -104,7 +129,8 @@ export const Dropzone = () => {
         onClick={() =>
           activeTab === "walrus"
             ? moveTxService.prepareFileWalrus()
-            : moveTxService.prepareFile()
+            : // moveTxService.test()
+              moveTxService.prepareFile()
         }
       >
         Upload

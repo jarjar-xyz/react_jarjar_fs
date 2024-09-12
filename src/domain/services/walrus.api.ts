@@ -1,3 +1,4 @@
+import { getMimeTypeFromBlob } from "@/lib/readMagicNumber";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -28,7 +29,6 @@ export class WalrusApi {
     }
 
     if (response.data.newlyCreated) {
-      toast.success("File already stored");
       return {
         blob: null,
         blobId: response.data.newlyCreated.blobObject.blobId,
@@ -43,12 +43,15 @@ export class WalrusApi {
   }
 
   async getFile(fileObjectId: string): Promise<Blob> {
-    //curl "$AGGREGATOR/v1/<some blob ID>"
     const url = `${import.meta.env.VITE_AGGREGATOR}/v1/${fileObjectId}`;
-    const response = await axios.get(url);
+    const response = await axios.get(url, { responseType: "blob" });
 
-    console.log("File fetched successfully", response);
+    const tmpBlob = new Blob([response.data]);
+    const mimeType = await getMimeTypeFromBlob(tmpBlob);
+    console.log("mimeType", mimeType);
 
-    return response.data;
+    const blob = new Blob([response.data], { type: mimeType });
+
+    return blob;
   }
 }
