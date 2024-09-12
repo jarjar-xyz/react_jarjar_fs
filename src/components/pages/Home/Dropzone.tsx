@@ -69,6 +69,7 @@ export const Dropzone = () => {
   const { dropzoneService, moveTxService } = useServices();
   const preview = useObservable(dropzoneService.preview);
   const isDragActive = useObservable(dropzoneService.isDragActive);
+  const activeTab = useObservable(dropzoneService.activeTab);
 
   if (!dropzoneService) return null;
 
@@ -99,7 +100,13 @@ export const Dropzone = () => {
         </label>
       </div>
 
-      <NeuromorphicButton onClick={() => moveTxService.prepareFile()}>
+      <NeuromorphicButton
+        onClick={() =>
+          activeTab === "walrus"
+            ? moveTxService.prepareFileWalrus()
+            : moveTxService.prepareFile()
+        }
+      >
         Upload
       </NeuromorphicButton>
     </div>

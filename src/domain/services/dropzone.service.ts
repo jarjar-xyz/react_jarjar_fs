@@ -34,20 +34,20 @@ export class DropzoneService {
     e.stopPropagation();
     this.setIsDragActive(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) {
-      this.handleFile(file);
-    }
+    this.handleFile(file);
   }
 
   handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
     const file = e.target.files?.[0];
-    if (file) {
-      this.handleFile(file);
-    }
+    this.handleFile(file);
   }
 
-  handleFile(file: File) {
+  handleFile(file: File | undefined) {
+    if (!file) {
+      toast.error("No file selected");
+      return;
+    }
     const maxSize = this.activeTab.get() === "sui" ? 112000 : 10485760;
     if (file.size > maxSize) {
       toast.error("File size exceeds max size");
@@ -64,5 +64,6 @@ export class DropzoneService {
     this.moveTxService.file.set(null);
     this.moveTxService.fileObjectId.set(null);
     this.preview.set(null);
+    this.moveTxService.uploadProgress.set(0);
   }
 }
