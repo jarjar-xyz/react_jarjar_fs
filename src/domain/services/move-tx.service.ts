@@ -6,21 +6,26 @@ import { bcs } from "@mysten/sui/bcs";
 import toast from "react-hot-toast";
 import { guessMimeType } from "@/lib/guessMimeType";
 import { SUI_CLOCK_OBJECT_ID } from "@mysten/sui/utils";
+import { WalrusApi } from "./walrus.api";
+import { FileStorageService } from "./fileStorage.service";
 
-console.log("SUI_CLOCK_OBJECT_ID",SUI_CLOCK_OBJECT_ID);
+console.log("SUI_CLOCK_OBJECT_ID", SUI_CLOCK_OBJECT_ID);
 
-const PACKAGE_ID =
-  "0xf9ed7e35ec12ae14becc95d58ce52b220922321e66c05a3339b567a40c3d7c73";
-const MODULE_NAME = "jarjar_fs";
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID;
+const MODULE_NAME = import.meta.env.VITE_MODULE_NAME;
+
 export class MoveTxService {
   suiClient: SuiClient | null = null;
   signAndExecute: any = null;
-  uploadProgress: WritableObservable<number> = observable(0);
+  uploadLoading: WritableObservable<boolean> = observable(false);
   userAddress: string | undefined = undefined;
   file: WritableObservable<File | null> = observable(null);
   fileObjectId: WritableObservable<string | null> = observable(null);
 
-  constructor() {}
+  constructor(
+    private readonly walrusApi: WalrusApi,
+    private readonly fileStorageService: FileStorageService,
+  ) {}
 
   async getOwnedFiles(walletAddress: string): Promise<string[]> {
     if (!this.suiClient) throw new Error("SuiClient not initialized");
@@ -28,7 +33,7 @@ export class MoveTxService {
     const objects = await this.suiClient.getOwnedObjects({
       owner: walletAddress,
       filter: {
-        StructType: `${PACKAGE_ID}::${MODULE_NAME}::File`
+        StructType: `${PACKAGE_ID}::${MODULE_NAME}::File`,
       },
       options: {
         showType: true,
@@ -38,8 +43,10 @@ export class MoveTxService {
     console.log("objects", objects);
 
     const fileObjects = objects.data
-      .filter(obj => obj.data?.type?.includes(`${PACKAGE_ID}::${MODULE_NAME}::File`))
-      .map(obj => obj.data?.objectId)
+      .filter((obj) =>
+        obj.data?.type?.includes(`${PACKAGE_ID}::${MODULE_NAME}::File`),
+      )
+      .map((obj) => obj.data?.objectId)
       .filter((id): id is string => id !== undefined);
 
     console.log("fileObjects", fileObjects);
@@ -51,51 +58,30 @@ export class MoveTxService {
     if (!this.userAddress) throw new Error("User address not initialized");
 
     const objects = await this.getOwnedFiles(this.userAddress);
-    const fileInfos = await Promise.all(objects.map(obj => this.getFileInfo(obj)));
+    const fileInfos = await Promise.all(
+      objects.map((obj) => this.getFileInfo(obj)),
+    );
     return fileInfos;
   }
 
   async executeTx(tx: Transaction, wait: boolean = false) {
     const exec = new Promise(async (resolve, reject) => {
-
-      // if (!this.suiClient || !this.userAddress) {
-      //   throw new Error("SuiClient or user address not initialized");
-      // }
-
-      // const coins = await this.suiClient.getCoins({
-      //   owner: this.userAddress,
-      //   coinType: "0x2::sui::SUI",
-      // });
-
-
-    
-      // // Sort coins by balance in descending order
-      // const sortedCoins = coins.data.sort((a, b) => BigInt(b.balance) - BigInt(a.balance) as unknown as number);
-    
-      // // Select the coin with the highest balance
-      // const gasCoin = sortedCoins[0];
-    
-      // if (!gasCoin) {
-      //   throw new Error("No SUI coins found in the wallet");
-      // }
-      // // Set the gas coin for the transaction
-      // tx.setGasPayment([{ objectId: gasCoin.coinObjectId, digest: gasCoin.digest, version: gasCoin.version }]);
-      // tx.setGasBudget(1000000000);
-
       this.signAndExecute(
         {
           transaction: tx,
-          requestType: 'WaitForLocalExecution',
+          requestType: "WaitForLocalExecution",
           options: {
             showEffects: true,
             showObjectChanges: true,
-            showInput: true
+            showInput: true,
           },
         },
         {
           onSuccess: async (data: any) => {
             try {
-              const result = wait ? await this.onSuccessWithWait(data) : await this.onSuccess(data);
+              const result = wait
+                ? await this.onSuccessWithWait(data)
+                : await this.onSuccess(data);
               resolve(result);
             } catch (error) {
               reject(error);
@@ -129,7 +115,7 @@ export class MoveTxService {
   onSuccess = async (data: any) => {
     console.log("start onSuccess", data);
     return data;
-  }
+  };
 
   onSuccessWithWait = async (data: any) => {
     console.log("start onSuccess", data);
@@ -169,19 +155,20 @@ export class MoveTxService {
       throw new Error("File not selected");
     }
 
-    this.uploadProgress.set(10);
+    this.uploadLoading.set(true);
     console.log("createFile", file);
     const tx = new Transaction();
 
     tx.moveCall({
       target: `${PACKAGE_ID}::${MODULE_NAME}::create_file`,
-      arguments: [tx.pure.u64(file.size), 
-        tx.pure.string(file.name), 
-        tx.object(SUI_CLOCK_OBJECT_ID)],
+      arguments: [
+        tx.pure.u64(file.size),
+        tx.pure.string(file.name),
+        tx.object(SUI_CLOCK_OBJECT_ID),
+      ],
     });
 
-
-    const result:any = await this.executeTx(tx, true);
+    const result: any = await this.executeTx(tx, true);
     console.log("result", result);
 
     const objectId = result.effects.created[0].reference.objectId;
@@ -191,6 +178,43 @@ export class MoveTxService {
     // console.log("fileObjectId", fileObjectId);
     this.fileObjectId.set(objectId);
     return objectId;
+  }
+
+  async prepareFileWalrus(): Promise<void> {
+    const file = this.file.get();
+    if (!file) {
+      toast.error("File not selected");
+      throw new Error("File not selected");
+    }
+    this.uploadLoading.set(true);
+    try {
+      const result = await this.walrusApi.uploadFile(file, 1);
+      toast.success("File uploaded to Walrus");
+      console.log("result", result);
+      const blob = await this.getFileWalrus(result.blobId);
+      // const blob = new Blob([binaryData], { type: file.type });
+      this.fileStorageService.addFileToDb({ ...result, blob: blob });
+      toast.success("File added to Walrus, you can check it in the Library");
+    } catch (error) {
+      throw error;
+    }
+    this.uploadLoading.set(false);
+  }
+
+  async test() {
+    const blob = await this.getFileWalrus(
+      "CLjUyEj4qQXn4vdhYh6FQIWYgeiKvF_OBwOdJMAhBQM",
+    );
+    console.log("blob", blob);
+    const arrayBuffer = await blob.arrayBuffer();
+    console.log(blob.type);
+    console.log(arrayBuffer);
+  }
+
+  async getFileWalrus(id: string): Promise<Blob> {
+    const file = await this.walrusApi.getFile(id);
+    console.log("file", file);
+    return file;
   }
 
   async prepareFile(): Promise<void> {
@@ -213,7 +237,6 @@ export class MoveTxService {
     const fileSize = file.size;
     const totalChunks = Math.ceil(fileSize / chunkSize);
 
-
     const newFileId = await this.createFile();
     console.log("newFileId", newFileId);
     for (let i = 0; i < totalChunks; i += chunksPerTx) {
@@ -223,12 +246,17 @@ export class MoveTxService {
         const start = chunkIndex * chunkSize;
         const end = Math.min(fileSize, start + chunkSize);
         const chunk = await file.slice(start, end).arrayBuffer();
-        await this.addChunk(newFileId as string, chunkIndex, new Uint8Array(chunk), tx);
+        await this.addChunk(
+          newFileId as string,
+          chunkIndex,
+          new Uint8Array(chunk),
+          tx,
+        );
       }
-  
+
       await this.executeTx(tx, true);
-      this.uploadProgress.set(Math.round(((i) / totalChunks) * 80));
       toast.success("File uploaded, go to Library to see it");
+      this.uploadLoading.set(false);
     }
   }
 
@@ -263,7 +291,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender: this.userAddress
+      sender: this.userAddress,
     });
 
     console.log("getFileInfo result", result);
@@ -273,9 +301,16 @@ export class MoveTxService {
     const file_created_at = result.results?.[0]?.returnValues?.[2]?.[0] || [];
     const parsed_file_size = bcs.u64().parse(Uint8Array.from(file_size));
     const parsed_file_name = bcs.string().parse(Uint8Array.from(file_name));
-    const parsed_file_created_at = bcs.u64().parse(Uint8Array.from(file_created_at));
+    const parsed_file_created_at = bcs
+      .u64()
+      .parse(Uint8Array.from(file_created_at));
 
-    return { id:fileId, file_size: parsed_file_size, file_name: parsed_file_name, created_at: parsed_file_created_at };
+    return {
+      id: fileId,
+      file_size: parsed_file_size,
+      file_name: parsed_file_name,
+      created_at: parsed_file_created_at,
+    };
   }
 
   async retrieveFile(fileId: string): Promise<string> {
@@ -313,7 +348,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender: this.userAddress
+      sender: this.userAddress,
     });
 
     const FileChunk = bcs.struct("FileChunk", {
@@ -344,7 +379,7 @@ export class MoveTxService {
 
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender:this.userAddress
+      sender: this.userAddress,
     });
     const chunk_count = result.results?.[0]?.returnValues?.[0]?.[0] || [];
     const parsed_chunk_count = bcs.u64().parse(Uint8Array.from(chunk_count));
@@ -364,8 +399,7 @@ export class MoveTxService {
     });
     const result = await this.suiClient.devInspectTransactionBlock({
       transactionBlock: tx,
-      sender: this.userAddress
-        
+      sender: this.userAddress,
     });
 
     console.log("getChunkOrder result", result);
